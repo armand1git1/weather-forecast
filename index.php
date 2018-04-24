@@ -6,25 +6,42 @@
 // The Weather class
 require_once 'WeatherForecast.class.php';
 
-// Apply the APi get receive 
+// Applying the api key for weather forecast
 $weather = new WeatherForecast('fac158843a594816b9c82138181804');
+$city    = "Helsinki";  // defautl city 
+$country = "Finland";    // default country 
+$days    = 5;            // default number of days  
 
+$key     =  "AIzaSyCWhBGsbVCWsVLln2lGthSrak6zQakVBkQ"; // Api key for Google Maps Geocoding API  
+if ((isset($_GET['lat']) && !empty($_GET['lat'])) && (isset($_GET['lng']) && !empty($_GET['lng'])) ) {
+   $lat   =  $_GET['lat'];    
+   $lng   =  $_GET['lng'];   
+   
+   $output=  $weather->convertlatlong_location($lat, $lng, $key); // Current lat & lng into location
+   $physical_location="";  // Initialization of the physical location (City, Country)
+   // Verify if the contain is not empty 
+  if (isset($output) && (!empty($output))) {
+  // Transfrom the string : city, country into an array 
+    $physical_location = explode(",",$output['results'][0]['formatted_address']);  
+    if (count($physical_location)>0){
+      $country       = $physical_location[count($physical_location) -1]; 
+      $city          = $physical_location[count($physical_location) -2];
+    }  
+  }
+}
 // Defines the name of the city, Country and the number of days of forecast (between 1 and 5)
-$weather->setRequest('Helsinki', 'Finland',  5);
-
+//echo $city; echo $country;
+$weather->setRequest($city, $country,  $days);
 // Setting the us metric to false, because we are using the degree Celsius
 $weather->setUSMetric(false);
 
-// Defines enabling caching of requests and optionally the lifetime of cache file in seconds
-#$weather->setCaching(true, 3600);
-
-// Defines the display of the error 
-#$weather->setDisplayError(false);
 ?>
+
 <html> 
     <head>
         <title>Weather Forecast</title>
         <link rel="stylesheet" href="screen.css" media="screen" />
+        <script language="javascript" type="text/javascript" src="js/function.js"></script>
     </head>
     <body>
         <?php
@@ -35,9 +52,11 @@ $weather->setUSMetric(false);
             ?>
 
             <h1><?php echo $response->locality; ?></h1>
-
-            <h2>The Weather Today at <?php echo $response->weather_now['weatherTime']; ?></h2>
-
+            
+            <!--
+            <h2>The Weather Today at <?php // echo $response->weather_now['weatherTime']; ?></h2>
+            -->
+            
             <div class="weather_now">
                 <span style="float:right;"><img src="<?php echo $response->weather_now['weatherIcon']; ?>" /></span>
                 <strong>DESCRIPTION:</strong> <?php echo $response->weather_now['weatherDesc']; ?><br />
@@ -77,5 +96,9 @@ $weather->setUSMetric(false);
             }
         }
         ?>
+        </br> </br>
+        <p id="position"></p>
+        <button onclick="getLocation()"><strong>Actualize</strong></button>
+        
     </body>
 </html>
