@@ -326,7 +326,7 @@ class WeatherForecast
         }
 
         $locality = $doc->request->query;
-        $current = $doc->current_condition;
+        $current  = $doc->current_condition;
 
         $new_doc = new stdClass();
         $new_doc->locality = (string) $locality . ' Weather in ' . date('d/m/Y', time());
@@ -375,8 +375,6 @@ class WeatherForecast
 
             $new_doc->weather_forecast = (object) $arr_weather;
         }
-
-        //print_r($new_doc->weather_forecast ); die();
         return $new_doc;
     }
 
@@ -449,8 +447,52 @@ class WeatherForecast
     protected function convertFtoC($term)
     {
         $term = ceil((($term - 32) / 9) * 5);
-
         return $term;
+    }
+
+     /**
+     * Converts latitude and longitude into physical location 
+     * 
+     * @param string $lat, $lng The input string, default those of helsinki 
+     * @return string
+     */
+    public function convertlatlong_location($lat ="60.169856", $lng ="24.938379", $key ="")
+    {
+        //$lat   =  "60.169856";    $lng   =  "24.938379"; 
+        /* Testing latitude
+        1- New York 
+        $lat   =  "40.712775";    $lng   =  "-74.005973"; 
+        2- London
+        $lat   =  "51.507351";    $lng   =  "-0.127758"; 
+        3- Paris
+        $lat   =  "48.856614";    $lng   =  "2.352222"; 
+        4- Helsinki 
+        $lat   =  "60.169856";    $lng   =  "24.938379"; 
+        5- Moscow 
+        $lat   =  "55.755826";    $lng   =  "37.617300"; 
+        6- Dubai 
+        $lat   =  "25.204849";    $lng   =  "55.270783"; 
+        7- Douala  
+        $lat   =  "4.051056";     $lng   =  "9.767869"; 
+        8- Johannesbourg  
+        $lat   =  "-26.204103";   $lng   =  "28.047305"; 
+        9- buenos Aires  
+        $lat   =  "-34.603684";   $lng   =  "-58.381559";
+        10- mexico   
+        $lat   =  "19.432608";    $lng   =  "-99.133208"; 
+        */        
+        // calling the google apis for geolocation, convert data into json format
+        $url   = 'https://maps.googleapis.com/maps/api/geocode/json?latlng='.trim($lat).','.trim($lng).'&key='.trim($key).'';  // Getting physical location ( Google api) 
+        $ch    = curl_init();      // Initializing curl call 
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        $response = curl_exec($ch); 
+        curl_close($ch);        
+        $output   = json_decode($response, true);  // receiving the response in form of json files format
+       // var_dump($output);        
+        return $output;
     }
 
 }
