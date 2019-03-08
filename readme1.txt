@@ -18,3 +18,4 @@ Getting API access from : https://www.worldweatheronline.com/
     https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/Using_geolocation
   - Reverse Geocoding (Address Lookup) 
     https://developers.google.com/maps/documentation/geocoding/intro#ReverseGeocoding
+   Nb : the free licence for the weather api is closed
